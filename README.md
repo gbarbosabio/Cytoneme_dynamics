@@ -2,7 +2,7 @@
  This repository contains a tool file to be intalled at Imagej/FIJI and two files with a pipeline analysis to convert the ImageJ/FIJI dataset file output into useful spreadsheets and graphs using R/RStudios.
  
  
-Instructions:
+"Cytoneme tools" instalation on FIJI/Imagej:
 
 0. Download the Cytoneme_dynamics Repository to your computer
 1. Please, have FIJI installed in your machine (https://imagej.net/software/fiji/downloads) \
