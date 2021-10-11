@@ -1,18 +1,20 @@
 #This section contains all the parameters that the user should change
 #Group order for plotting
 #Each group MUST be named EXACTLY as in the Group folder
-#The same MUST be writen between ""
+#The same MUST be written between ""
 #Example: in a case where there are 3 groups (so 3 folders)
 #Group_order<- c("Control", "Treatment1", "Treatment2")
 #ALERT! IMPORTANT! --- > The number of group names MUTS
 #correspond to the number of group folders
 
-Group_order<- c("Control", "Treatment1")
+Group_order<- c("Control", "Treatment1", "Treatment2")
+
 
 #FACTOR_STALL times the average step defines the variance threshold that needs to exist between to consecutive steps to be considered a moving
 #Values close to 0 will constrain the variance threshold, therefore allow for more steps to be considered movement
 #Values close to 1 will increase the variance threshold, therefore allow for more steps to be considered stall
 FACTOR_STALL<-0.5 #recommended values between 0 and 1
+
 
 
 #------DON'T CHANGE ANYTHING BELLOW THIS LINE-------------------
@@ -43,8 +45,24 @@ library(corrplot)
 
 Cyt_folder<-getwd()
 folder.name<-dir()
+CytonemeMAXlength<-c()
 for (w in 1:length(folder.name)){
-setwd(paste(getwd(),"/",folder.name[w],sep = ""))
+  setwd(paste(Cyt_folder,"/",folder.name[w],sep = ""))
+  files<-dir()
+  files.name<-gsub(".txt", "", files)
+  for (i in 1:length(files)) {
+    assign(files.name[i], 
+           read.csv(files[i], header = T, sep = "\t",
+           ))
+  }
+  for(g in 1:length(files.name)){
+    f<-get(files.name[g])
+    CytonemeMAXlength<-max(c(max(f$Length, na.rm = T),CytonemeMAXlength))
+  }
+}
+
+for (w in 1:length(folder.name)){
+setwd(paste(Cyt_folder,"/",folder.name[w],sep = ""))
 files<-dir()
 files.name<-gsub(".txt", "", files)
 for (i in 1:length(files)) {
@@ -283,23 +301,26 @@ cell_order<-rownames(lengthMATRIX)[hc$order]
 #plotting Length change by cytoneme over time
 
 max_limit_length <- ceiling(max(Cyt_dynamics[,4],na.rm = T))
+tilew<- (Cyt_dynamics[2,3]-Cyt_dynamics[1,3])*1.1
 Legth_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,3], 
-                                              y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                              y = factor(Cyt_dynamics[,2], level = cell_order), 
+                                              width=tilew, height=1)) + 
   geom_tile(aes(fill = Cyt_dynamics[,4]))+
-  scale_fill_gradient(low="purple", high = "yellow", limits = c(0,max_limit_length))+
+  scale_fill_gradient(low="purple", high = "yellow", limits = c(0,CytonemeMAXlength))+
   ggtitle("Length change by cytoneme over time")+
   ylab("Cytoneme")+
   xlab("Time (min)")+
   labs(fill = "Length")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Legth_Time_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
 
 #plot Motion status by cytoneme over time
 Status_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,3], 
-                                               y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                               y = factor(Cyt_dynamics[,2], level = cell_order), 
+                                               width=tilew, height=1)) + 
   geom_tile(aes(fill = Cyt_dynamics[,7]))+
   scale_fill_brewer(palette = "Accent")+
   ggtitle("Motion status by cytoneme over time")+
@@ -307,14 +328,16 @@ Status_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,3],
   xlab("Time (min)")+
   labs(fill = "Motion Status")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Status_Time_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
 
+
 #plot Steps length by cytonemes over time
 Steps_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,3], 
-                                              y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                              y = factor(Cyt_dynamics[,2], level = cell_order),
+                                              width=tilew, height=1)) + 
   ggtitle("Steps length by cytonemes over time")+
   geom_tile(aes(fill = Cyt_dynamics[,5]))+
   scale_fill_gradient2(low="magenta", mid = "gray" ,high = "yellow", midpoint = 0, 
@@ -323,7 +346,7 @@ Steps_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,3],
   xlab("Time (min)")+
   labs(fill = "Step length")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Steps_Time_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
@@ -331,24 +354,26 @@ ggsave(paste("Steps_Time_Cytoneme_",folder.name[w],".png"), device = "png", widt
 
 #plotting Length change by cytoneme over relative time
 
-max_limit_length <- ceiling(max(Cyt_dynamics[,4],na.rm = T))
+
 Legth_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,6], 
-                                              y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                              y = factor(Cyt_dynamics[,2], level = cell_order),
+                                              width=tilew, height=1)) + 
   geom_tile(aes(fill = Cyt_dynamics[,4]))+
-  scale_fill_gradient(low="purple", high = "yellow", limits = c(0,max_limit_length))+
+  scale_fill_gradient(low="purple", high = "yellow", limits = c(0,CytonemeMAXlength))+
   ggtitle("Length change by cytoneme over time")+
   ylab("Cytoneme")+
   xlab("Time (min)")+
   labs(fill = "Length")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Legth_RelativeTime_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
 
 #plot Motion status by cytoneme over relative time
 Status_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,6], 
-                                               y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                               y = factor(Cyt_dynamics[,2], level = cell_order),
+                                               width=tilew, height=1)) + 
   geom_tile(aes(fill = Cyt_dynamics[,7]))+
   scale_fill_brewer(palette = "Accent")+
   ggtitle("Motion status by cytoneme over time")+
@@ -356,14 +381,15 @@ Status_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,6],
   xlab("Time (min)")+
   labs(fill = "Motion Status")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Status_RelativeTime_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
 
 #plot Steps length by cytonemes over relative time
 Steps_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,6], 
-                                              y = factor(Cyt_dynamics[,2], level = cell_order))) + 
+                                              y = factor(Cyt_dynamics[,2], level = cell_order), 
+                                              width=tilew, height=1)) + 
   ggtitle("Steps length by cytonemes over time")+
   geom_tile(aes(fill = Cyt_dynamics[,5]))+
   scale_fill_gradient2(low="magenta", mid = "gray" ,high = "yellow", midpoint = 0, 
@@ -372,7 +398,7 @@ Steps_Time_Cytoneme<-ggplot(Cyt_dynamics, aes(x = Cyt_dynamics[,6],
   xlab("Time (min)")+
   labs(fill = "Step length")+
   scale_y_discrete (labels = NULL, expand = c(0,0))+
-  scale_x_continuous(limits = c(-1,61), expand = c(0,0))+
+  scale_x_continuous(limits = c(-1,max(Cyt_dynamics[,3], na.rm = T)+1), expand = c(0,0))+
   theme_classic()
 
 ggsave(paste("Steps_RelativeTime_Cytoneme_",folder.name[w],".png"), device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = F)
@@ -451,3 +477,4 @@ for (g in 4:18){
          device = "png", width = 15, height = 15, units = "cm", dpi=300,limitsize = T)
 }
 
+rm(list = ls())
