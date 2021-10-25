@@ -1,5 +1,5 @@
 # Cytoneme_dynamics
- This repository contains the Cytoneme Analisys tool file to be intalled at Imagej/FIJI and the R pipeline analysis to convert the ImageJ/FIJI dataset file output into data spreadsheets and analisys graphs using R/RStudios
+This repository contains the Cytoneme Analysis tool file to be installed at Imagej/FIJI and the R pipeline analysis to convert the ImageJ/FIJI dataset file output into data spreadsheets and analysis graphs using R/RStudios
 
 Installation of FIJI/ImageJ Cytoneme Analysis Tool video tutorial.
 
