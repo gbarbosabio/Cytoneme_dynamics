@@ -3,8 +3,8 @@
 
 Installation of FIJI/ImageJ Cytoneme Analysis Tool video tutorial.
 
-https://user-images.githubusercontent.com/16870811/138746734-a6dc4e38-fada-46fe-a8a0-72a14ea77033.mp4
+https://user-images.githubusercontent.com/16870811/138750483-6def3f08-a50c-4d8b-8ec5-68cc8d3c648d.mp4
 
 Cytoneme length measurement using FIJI/ImageJ Cytoneme Analysis Tool video tutorial.
 
-https://youtu.be/4UoxL1mnFsU
+https://www.youtube.com/watch?v=puYMtgEGAAc
